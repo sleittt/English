@@ -1,3 +1,18 @@
 <resources>
-    <string name="app_name">bebeka</string>
+    <string name="app_name">Nameofapp</string>
+    <string name="no_users">No users yet</string>
+    <string name="tops">Top users</string>
+    <string name="exc">Available exercises</string>
+    <string name="animal">Guess the animal</string>
+    <string name="words">Word practice</string>
+    <string name="audition">Audition</string>
+    <string name="game">Game</string>
+    <string name="points">%1$d points</string>
+    <string name="tmbn">Hello %1$s</string>
+    <string name="tmbb">Are you ready to chtototam</string>
+    <string name="nickname">This is your profile %1$s</string>
+    <string name="todark">Switch to dark</string>
+    <string name="chnglanguage">Change language</string>
+    <string name="chngimage">Change your profile image</string>
+    <string name="logout">Log out</string>
 </resources>

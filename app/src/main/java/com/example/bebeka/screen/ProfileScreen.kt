@@ -1,14 +1,11 @@
 package com.example.bebeka.screen
 
-import android.content.Context
-import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,18 +28,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
+import com.example.bebeka.R
 import com.example.bebeka.Routes
 import com.example.bebeka.logik.AppDatabase
 import com.example.bebeka.logik.SessionManager
@@ -144,7 +141,7 @@ fun ProfileScreen(navController: NavController) {
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                     }
-                    Text(text="Your profile, ${currentUser?.username ?: "User"}",
+                    Text(text=stringResource(R.string.nickname, currentUser?.username ?: "User"),
                         fontSize = 22.sp,
                         fontFamily = fredokaFonts,
                         fontWeight = FontWeight.Medium)
@@ -165,7 +162,7 @@ fun ProfileScreen(navController: NavController) {
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = enabledButton)) {
-                Text(text="Switch to dark (non-functional)",
+                Text(text=stringResource(R.string.todark),
                     fontSize = 20.sp,
                     fontFamily = fredokaFonts,
                     fontWeight = FontWeight.Medium)
@@ -178,7 +175,7 @@ fun ProfileScreen(navController: NavController) {
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = enabledButton)) {
-                Text(text="Switch language",
+                Text(text=stringResource(R.string.chnglanguage),
                     fontSize = 20.sp,
                     fontFamily = fredokaFonts,
                     fontWeight = FontWeight.Medium)
@@ -191,7 +188,7 @@ fun ProfileScreen(navController: NavController) {
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = enabledButton)) {
-                Text(text="Change your image",
+                Text(text=stringResource(R.string.chngimage),
                     fontSize = 20.sp,
                     fontFamily = fredokaFonts,
                     fontWeight = FontWeight.Medium)
@@ -208,7 +205,7 @@ fun ProfileScreen(navController: NavController) {
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFE5E5E5))) {
-                Text(text="Logout",
+                Text(text=stringResource(R.string.logout),
                     fontSize = 20.sp,
                     fontFamily = fredokaFonts,
                     fontWeight = FontWeight.Medium)

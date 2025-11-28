@@ -5,8 +5,6 @@ import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -95,12 +94,12 @@ fun MainScreen(navController: NavController, context: Context) {
             .padding(innerPadding)
             .padding(horizontal = 24.dp), horizontalAlignment = Alignment.Start) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text="Top users",
+            Text(text=stringResource(id = R.string.tops),
                 fontSize = 20.sp,
                 fontFamily = fredokaFonts,
                 fontWeight = FontWeight.Medium)
             Spacer(modifier = Modifier.height(8.dp))
-            //@@@ Отображаем топ пользователей или заглушку, если список пуст
+            //Отображаем топ пользователей или заглушку, если список пуст
             if (topUsers.isNotEmpty()) {
                 topUsers.forEachIndexed { index, user ->
                     LeaderBoardUser(
@@ -110,11 +109,11 @@ fun MainScreen(navController: NavController, context: Context) {
                     )
                 }
             } else {
-                Text("No users yet")
+                Text(stringResource(id = R.string.no_users))
                 Spacer(modifier = Modifier.height(20.dp))
             }
 
-            Text(text="Available exercises",
+            Text(text=stringResource(id = R.string.exc),
                 fontSize = 20.sp,
                 fontFamily = fredokaFonts,
                 fontWeight = FontWeight.Medium)
@@ -133,7 +132,7 @@ fun MainScreen(navController: NavController, context: Context) {
                                 contentDescription = null,
                                 modifier = Modifier.size(90.dp)
                             )
-                            Text(text="Guess the animal",
+                            Text(text=stringResource(id = R.string.animal),
                                 fontSize = 13.sp,
                                 fontFamily = fredokaFonts,
                                 fontWeight = FontWeight.Light,
@@ -151,7 +150,7 @@ fun MainScreen(navController: NavController, context: Context) {
                                 contentDescription = null,
                                 modifier = Modifier.size(90.dp)
                             )
-                            Text(text="Word practice",
+                            Text(text=stringResource(id = R.string.words),
                                 fontSize = 13.sp,
                                 fontFamily = fredokaFonts,
                                 fontWeight = FontWeight.Light,
@@ -171,7 +170,7 @@ fun MainScreen(navController: NavController, context: Context) {
                                 contentDescription = null,
                                 modifier = Modifier.size(90.dp)
                             )
-                            Text(text="Audition",
+                            Text(text=stringResource(id = R.string.audition),
                                 fontSize = 13.sp,
                                 fontFamily = fredokaFonts,
                                 fontWeight = FontWeight.Light,
@@ -189,7 +188,7 @@ fun MainScreen(navController: NavController, context: Context) {
                                 contentDescription = null,
                                 modifier = Modifier.size(90.dp)
                             )
-                            Text(text="Game",
+                            Text(text=stringResource(id = R.string.game),
                                 fontSize = 13.sp,
                                 fontFamily = fredokaFonts,
                                 fontWeight = FontWeight.Light,
@@ -242,7 +241,7 @@ fun LeaderBoardUser(
             fontFamily = fredokaFonts,
             fontWeight = FontWeight.Medium,
             color = Color.Black)
-        Text(text="$points points",
+        Text(text=stringResource(id = R.string.points, points),
             fontSize = 17.sp,
             fontFamily = fredokaFonts,
             fontWeight = FontWeight.Medium,

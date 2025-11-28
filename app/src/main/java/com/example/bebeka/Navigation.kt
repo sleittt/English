@@ -2,8 +2,10 @@ package com.example.bebeka
 
 import android.content.Context
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -11,7 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.bebeka.screen.games.WordsScreen
 import com.example.profik.screen.games.animalScreen
-import com.example.profik.screen.LanguageSelectScreen
+import com.example.bebeka.screen.LanguageSelectScreen
 import com.example.bebeka.screen.LogInScreen
 import com.example.bebeka.screen.MainScreen
 import com.example.bebeka.screen.ProfileScreen
@@ -43,8 +45,6 @@ public sealed class Routes(val route: String) {
     object Splash : Routes("Splash")
     object Profile : Routes("Profile") // Добавлен новый маршрут для профиля
 }
-
-// Добавьте эту функцию после sealed class Routes, но до @Composable функции Navigation
 
 // Функция для создания маршрута Signup2 с параметрами
 fun createSignup2Route(firstName: String, lastName: String, email: String): String {
@@ -145,6 +145,19 @@ fun Navigation(navController: NavHostController, innerPadding: Modifier, context
         composable(Routes.Words.route) { WordsScreen(navController = navController) }
         composable(Routes.Audition.route) { ListeningScreen(navController = navController) }
         composable(Routes.Profile.route) { ProfileScreen(navController = navController) } // Добавлен ProfileScreen
+    }
+}
+@Composable
+fun BackNavigation(
+    navController: NavController,
+    targetRoute: String,
+    enabled: Boolean = true
+) {
+    BackHandler(enabled = enabled) {
+        navController.navigate(targetRoute) {
+            popUpTo(targetRoute) { inclusive = true }
+            launchSingleTop = true
+        }
     }
 }
 

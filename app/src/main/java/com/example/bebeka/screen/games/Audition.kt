@@ -1,5 +1,11 @@
 package com.example.bebeka.screen.games
 
+import android.content.Context
+import android.content.Intent
+import android.media.MediaRecorder
+import android.os.Build
+import android.speech.RecognitionListener
+import android.speech.SpeechRecognizer.createOnDeviceSpeechRecognizer
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
@@ -12,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.Button
@@ -30,16 +37,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.bebeka.Routes
+
 import com.example.bebeka.screen.topAppBar
+import com.example.bebeka.ui.theme.enabledButton
+import com.example.bebeka.ui.theme.fredokaFonts
 import kotlinx.coroutines.delay
+import java.io.File
 import kotlin.random.Random
+import java.util.concurrent.Executors
+import android.speech.RecognitionListener.*
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
+import com.example.bebeka.logik.SpeechRecognitionListener
 
 data class ListeningWord(
     val word: String,
@@ -47,7 +65,7 @@ data class ListeningWord(
 )
 
 val listeningWords = listOf(
-    ListeningWord("cucumber", "[ kjukkmbs ]"),
+    ListeningWord("cucumber", "[ 'kju:kʌmbə ]"),
     ListeningWord("apple", "[ æpl ]"),
     ListeningWord("banana", "[ bəˈnɑːnə ]"),
     ListeningWord("tomato", "[ təˈmɑːtəʊ ]"),
@@ -60,33 +78,11 @@ fun ListeningScreen(navController: NavController) {
     var isRecording by remember { mutableStateOf(false) }
     var isSuccess by remember { mutableStateOf(false) }
     var showResult by remember { mutableStateOf(false) }
-
+    var mediaRecorder by remember { mutableStateOf<MediaRecorder?>(null) }
+    val context = LocalContext.current
     val scale = remember { Animatable(1f) }
+    var recognizedText by remember { mutableStateOf("") }
 
-    LaunchedEffect(isRecording) {
-        if (isRecording) {
-            scale.animateTo(
-                targetValue = 1.3f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(500),
-                    repeatMode = RepeatMode.Reverse
-                )
-            )
-        } else {
-            scale.animateTo(1f)
-        }
-    }
-
-    LaunchedEffect(isRecording) {
-        if (isRecording) {
-            delay(2000L) // Эмуляция записи в течение 2 секунд
-            isRecording = false
-            showResult = true
-
-            // Случайный результат для демонстрации
-            isSuccess = Random.nextBoolean()
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -100,10 +96,10 @@ fun ListeningScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 20.dp,vertical= 30.dp)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
             if (!showResult) {
                 // Основной экран с словом
@@ -113,16 +109,16 @@ fun ListeningScreen(navController: NavController) {
                 ) {
                     Text(
                         text = currentWord.word,
-                        fontSize = 32.sp,
+                        fontSize = 22.sp,
+                        fontFamily = fredokaFonts,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
                         text = currentWord.transcription,
-                        fontSize = 18.sp,
+                        fontSize = 15.sp,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
 
@@ -130,8 +126,9 @@ fun ListeningScreen(navController: NavController) {
 
                     Text(
                         text = "Please press button and say this word. Our service will check your pronunciation",
-                        fontSize = 16.sp,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        fontSize = 22.sp,
+                        fontFamily = fredokaFonts,
+                        textAlign = TextAlign.Start,
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
 
@@ -139,33 +136,43 @@ fun ListeningScreen(navController: NavController) {
 
                     Button(
                         onClick = {
-                            if (!isRecording) {
-                                isRecording = true
+                            if (isRecording) {
+                                val speechRecognizer = createOnDeviceSpeechRecognizer(context)
+                                val speechListener = SpeechRecognitionListener(
+                                    onResultCallback = { result ->
+                                        recognizedText = result // Сохраняем результат
+                                        isSuccess = recognizedText.equals(currentWord.word, ignoreCase = true) // Проверяем совпадение
+                                        showResult = true // Показываем результат
+                                        isRecording = false
+                                    }
+                                )
+                                speechRecognizer.setRecognitionListener(speechListener)
+                                val recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH)
+                                    putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                        putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+                                    }
+                                }
+                                speechRecognizer.startListening(recognizerIntent)
+                            }else {
+                                // Останавливаем запись
+                                mediaRecorder?.apply {
+                                    stop()
+                                    release()
+                                }
+                                mediaRecorder = null
+                                isRecording = false
                             }
                         },
+                        modifier = Modifier.height(56.dp).fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isRecording) Color(0xFFFF6B6B) else MaterialTheme.colorScheme.primary
-                        ),
-                        modifier = Modifier
-                            .size(120.dp)
-                            .scale(scale.value),
-                        enabled = !isRecording
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Mic,
-                                contentDescription = "Microphone",
-                                modifier = Modifier.size(40.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = if (isRecording) "Recording..." else "Check my speech",
-                                fontSize = 14.sp
-                            )
-                        }
-                    }
+                            containerColor = enabledButton)
+                    ) { Text(text="Check my speech",
+                        fontSize = 20.sp,
+                        fontFamily = fredokaFonts,
+                        fontWeight = FontWeight.Medium) }
                 }
             } else {
                 // Экран результата
@@ -183,7 +190,7 @@ fun ListeningScreen(navController: NavController) {
                     Spacer(modifier = Modifier.height(30.dp))
 
                     Text(
-                        text = if (isSuccess) currentWord.word else "pupumber",
+                        text = recognizedText,
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (isSuccess) Color(0xFF4CAF50) else Color(0xFFF44336)

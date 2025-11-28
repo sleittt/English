@@ -2,7 +2,6 @@ package com.example.profik.screen.games
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -45,13 +43,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.bebeka.BackNavigation
 import com.example.bebeka.R
 import com.example.bebeka.Routes
 import com.example.bebeka.logik.AppDatabase
 import com.example.bebeka.logik.PointsCalculator
 import com.example.bebeka.logik.SessionManager
 import com.example.bebeka.logik.UserRepository
-import com.example.bebeka.screen.topAppBar
 import com.example.bebeka.ui.theme.DeepBlue
 import com.example.bebeka.ui.theme.enabledButton
 import com.example.bebeka.ui.theme.fredokaFonts
@@ -95,6 +93,7 @@ fun animalScreen(navController: NavController) {
             }
         }
     }
+    BackNavigation(navController, Routes.Main.route)
 
     Scaffold(
         topBar = {
@@ -197,6 +196,7 @@ fun animalScreen(navController: NavController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun animalGuess(navController: NavController, answer: String) {
+    BackNavigation(navController, Routes.Main.route)
     Scaffold(
         topBar = {
             TopAppBar(title = {
@@ -226,7 +226,8 @@ fun animalGuess(navController: NavController, answer: String) {
         ) {
             Spacer(Modifier.height(50.dp))
             if (answer == "correct") {
-                Image(ImageBitmap.imageResource(R.drawable.correct), contentDescription = null, modifier = Modifier.size(160.dp))
+                Text(text="\uD83C\uDF89",
+                    fontSize = 160.sp,)
                 Spacer(Modifier.height(30.dp))
                 Text(text="Holy Molly! That is Right!",
                     fontSize = 20.sp,
@@ -234,7 +235,8 @@ fun animalGuess(navController: NavController, answer: String) {
                     fontWeight = FontWeight.Medium)
                 Spacer(Modifier.height(30.dp))
             } else {
-                    Image(ImageBitmap.imageResource(R.drawable.incorrect), contentDescription = null, modifier = Modifier.size(160.dp))
+                Text(text="\uD83D\uDE3F",
+                    fontSize = 160.sp,)
                 Spacer(Modifier.height(30.dp))
                 Text(text="Eh? Wrong answer :(\n" +
                             "That is: $answer",
@@ -284,5 +286,5 @@ fun animalGuess(navController: NavController, answer: String) {
 @Preview
 @Composable
 fun preview() {
-    animalGuess(rememberNavController(), "asd" )
+    animalGuess(rememberNavController(), "correct" )
 }

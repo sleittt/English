@@ -2,7 +2,6 @@ package com.example.bebeka.screen.games
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,12 +37,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.bebeka.BackNavigation
 import com.example.bebeka.Routes
 import com.example.bebeka.logik.AppDatabase
 import com.example.bebeka.logik.PointsCalculator
 import com.example.bebeka.logik.SessionManager
 import com.example.bebeka.logik.UserRepository
-import com.example.bebeka.screen.topAppBar
 import com.example.bebeka.ui.theme.DeepBlue
 import com.example.bebeka.ui.theme.enabledButton
 import com.example.bebeka.ui.theme.fredokaFonts
@@ -70,7 +69,7 @@ val words=arrayOf(
 fun WordsScreen(navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-
+    BackNavigation(navController, Routes.Main.route)
     // Инициализация репозитория
     val db = remember { AppDatabase.getDatabase(context) }
     val userRepository = remember { UserRepository(db.userDao()) }
