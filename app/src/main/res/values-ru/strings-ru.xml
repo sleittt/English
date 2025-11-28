@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ИмяПриложения</string>
+    <string name="no_users">Пока нет пользователей</string>
+    <string name="tops">Топ пользователей</string>
+    <string name="exc">Доступные упражнения</string>
+    <string name="animal">Угадай животное</string>
+    <string name="words">Слова</string>
+    <string name="audition">Аудирование</string>
+    <string name="game">Игра</string>
+    <string name="points">%1$d очков</string>
+    <string name="tmbn">Привет %1$s</string>
+    <string name="tmbb">Ты готов к чему то там</string>
+    <string name="nickname">Это твой профиль %1$s</string>
+    <string name="todark">Сменить тему</string>
+    <string name="chnglanguage">Сменить язык</string>
+    <string name="chngimage">Сменить картинку профиля</string>
+    <string name="logout">Выйти из профиля</string>
+</resources>
