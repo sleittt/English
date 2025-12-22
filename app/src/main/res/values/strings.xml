@@ -6,7 +6,7 @@
     <string name="animal">Guess the animal</string>
     <string name="whoanimal">Write who is on image</string>
     <string name="animalright">Holy Molly! That is Right!</string>
-    <string name="animalfalse">Eh? Wrong answer :(\n""That is: %1$s</string>
+    <string name="animalfalse">Eh? Wrong answer :( That is: %1$s</string>
     <string name="words">Word practice</string>
     <string name="audition">Audition</string>
     <string name="game">Complete the sentence</string>

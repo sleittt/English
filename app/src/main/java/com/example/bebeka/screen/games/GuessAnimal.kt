@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -183,7 +184,7 @@ fun animalScreen(navController: NavController) {
                 colors = ButtonDefaults.buttonColors(
                     containerColor = enabledButton)
             ) {
-                Text(text = "Check",
+                Text(text = stringResource(R.string.check),
                     fontSize = 15.sp,
                     fontFamily = fredokaFonts,
                     fontWeight = FontWeight.Medium)
@@ -200,7 +201,7 @@ fun animalGuess(navController: NavController, answer: String) {
     Scaffold(
         topBar = {
             TopAppBar(title = {
-                Text(text="Guess the animal",
+                Text(text= stringResource(R.string.animal),
                 color = Color.White,
                 fontSize = 22.sp,
                 fontFamily = fredokaFonts,
@@ -229,7 +230,7 @@ fun animalGuess(navController: NavController, answer: String) {
                 Text(text="\uD83C\uDF89",
                     fontSize = 160.sp,)
                 Spacer(Modifier.height(30.dp))
-                Text(text="Holy Molly! That is Right!",
+                Text(text=stringResource(R.string.animalright),
                     fontSize = 20.sp,
                     fontFamily = fredokaFonts,
                     fontWeight = FontWeight.Medium)
@@ -238,8 +239,7 @@ fun animalGuess(navController: NavController, answer: String) {
                 Text(text="\uD83D\uDE3F",
                     fontSize = 160.sp,)
                 Spacer(Modifier.height(30.dp))
-                Text(text="Eh? Wrong answer :(\n" +
-                            "That is: $answer",
+                Text(text=stringResource(R.string.animalfalse, answer),
                         fontSize = 20.sp,
                         fontFamily = fredokaFonts,
                         fontWeight = FontWeight.Medium,
@@ -256,7 +256,7 @@ fun animalGuess(navController: NavController, answer: String) {
                         colors = ButtonDefaults.buttonColors(
                             containerColor = enabledButton)
                     ) {
-                        Text(text="Try again",
+                        Text(text= stringResource(R.string.again),
                             fontSize = 20.sp,
                             fontFamily = fredokaFonts,
                             fontWeight = FontWeight.Medium)
@@ -274,7 +274,7 @@ fun animalGuess(navController: NavController, answer: String) {
                 colors = ButtonDefaults.buttonColors(
                     containerColor = enabledButton)
             ) {
-                Text(text="Next",
+                Text(text= stringResource(R.string.next),
                     fontSize = 20.sp,
                     fontFamily = fredokaFonts,
                     fontWeight = FontWeight.Medium)

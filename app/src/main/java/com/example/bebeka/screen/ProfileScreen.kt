@@ -157,16 +157,6 @@ fun ProfileScreen(navController: NavController) {
                 .fillMaxSize(),
             verticalArrangement = Arrangement.Bottom
         ) {
-            Button(onClick = {},
-                modifier = Modifier.height(56.dp).fillMaxWidth(),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = enabledButton)) {
-                Text(text=stringResource(R.string.todark),
-                    fontSize = 20.sp,
-                    fontFamily = fredokaFonts,
-                    fontWeight = FontWeight.Medium)
-            }
             Spacer(Modifier.height(10.dp))
             Button(onClick = {
                 navController.navigate("${Routes.langSelect.route}?firstChange=false")

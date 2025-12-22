@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.bebeka.BackNavigation
+import com.example.bebeka.R
 import com.example.bebeka.Routes
 import com.example.bebeka.logik.AppDatabase
 import com.example.bebeka.logik.PointsCalculator
@@ -80,7 +82,7 @@ fun WordsScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(title = {
-                Text(text="Word practice",
+                Text(text= stringResource(R.string.words),
                     color = Color.White,
                     fontSize = 22.sp,
                     fontFamily = fredokaFonts,
@@ -143,13 +145,6 @@ fun WordsScreen(navController: NavController) {
                 fontFamily = fredokaFonts,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center)
-            if (currentEnglish){
-                Text(text="Transcription",
-                    fontSize = 17.sp,
-                    fontFamily = fredokaFonts,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center)
-            }
 
             Spacer(Modifier.height(40.dp))
             Column {
@@ -225,7 +220,7 @@ fun WordsScreen(navController: NavController) {
                 colors = ButtonDefaults.buttonColors(
                     containerColor = enabledButton)
             ) {
-                Text(text=if (isAnswered && selectedIndex != -1) "Next" else "Check",
+                Text(text=if (isAnswered && selectedIndex != -1) stringResource(R.string.next) else stringResource(R.string.check),
                     fontSize = 20.sp,
                     fontFamily = fredokaFonts,
                     fontWeight = FontWeight.Bold,

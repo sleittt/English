@@ -5,7 +5,7 @@
     <string name="tops">Топ пользователей</string>
     <string name="exc">Доступные упражнения</string>
     <string name="animal">Угадай животное</string>
-    <string name="animalfalse">Неправильно</string>
+    <string name="animalfalse">Неправильно Это %1$s</string>
     <string name="words">Слова</string>
     <string name="audition">Аудирование</string>
     <string name="game">Дополни предложение</string>

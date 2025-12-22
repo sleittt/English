@@ -80,96 +80,123 @@ fun MainScreen(navController: NavController, context: Context) {
         }
     }
 
-    Scaffold(topBar = {
-        topMainBar(
-            nickname = currentUser?.username,
-            navController = navController,
-            currentUser = currentUser // Передаем currentUser в topMainBar
-        )
-    },
+    Scaffold(
+        topBar = {
+            topMainBar(
+                nickname = currentUser?.username,
+                navController = navController,
+                currentUser = currentUser // Передаем currentUser в topMainBar
+            )
+        },
         modifier = Modifier.fillMaxSize()
-    ){ innerPadding ->
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
-            .padding(horizontal = 24.dp), horizontalAlignment = Alignment.Start) {
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 24.dp), horizontalAlignment = Alignment.Start
+        ) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text=stringResource(id = R.string.tops),
-                fontSize = 20.sp,
-                fontFamily = fredokaFonts,
-                fontWeight = FontWeight.Medium)
             Spacer(modifier = Modifier.height(8.dp))
 
             currentUser?.let { Text(stringResource(id = R.string.you_points, it.points)) }
-                Spacer(modifier = Modifier.height(20.dp))
-            }
+            Spacer(modifier = Modifier.height(20.dp))
 
-            Text(text=stringResource(id = R.string.exc),
+
+            Text(
+                text = stringResource(id = R.string.exc),
                 fontSize = 20.sp,
                 fontFamily = fredokaFonts,
-                fontWeight = FontWeight.Medium)
+                fontWeight = FontWeight.Medium
+            )
             Spacer(Modifier.height(20.dp))
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()) {
-                Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-                    Button(onClick = {navController.navigate(Routes.Animal.route)},modifier = Modifier
-                        .weight(1F)
-                        , shape = RoundedCornerShape(30.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = enabledButton)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+            )
+            {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(
+                        onClick = { navController.navigate(Routes.Animal.route) },
+                        modifier = Modifier
+                            .weight(1F),
+                        shape = RoundedCornerShape(30.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = enabledButton)
+                    ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Image(
                                 ImageBitmap.imageResource(R.drawable.animal),
                                 contentDescription = null,
                                 modifier = Modifier.size(90.dp)
                             )
-                            Text(text=stringResource(id = R.string.animal),
+                            Text(
+                                text = stringResource(id = R.string.animal),
                                 fontSize = 13.sp,
                                 fontFamily = fredokaFonts,
                                 fontWeight = FontWeight.Light,
-                                color = Color.White)
+                                color = Color.White
+                            )
                         }
                     }
                     Spacer(Modifier.width(15.dp))
-                    Button(onClick = {navController.navigate(Routes.Words.route)},modifier = Modifier
-                        .weight(1F)
-                        , shape = RoundedCornerShape(30.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD6185D))) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally){
+                    Button(
+                        onClick = { navController.navigate(Routes.Words.route) },
+                        modifier = Modifier
+                            .weight(1F),
+                        shape = RoundedCornerShape(30.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD6185D))
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Image(
                                 ImageBitmap.imageResource(R.drawable.words),
                                 contentDescription = null,
                                 modifier = Modifier.size(90.dp)
                             )
-                            Text(text=stringResource(id = R.string.words),
+                            Text(
+                                text = stringResource(id = R.string.words),
                                 fontSize = 13.sp,
                                 fontFamily = fredokaFonts,
                                 fontWeight = FontWeight.Light,
-                                color = Color.White)
+                                color = Color.White
+                            )
                         }
                     }
                 }
                 Spacer(Modifier.height(15.dp))
-                Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-                    Spacer(Modifier.width(15.dp))
-                    Button(onClick = {navController.navigate(Routes.Sentence.route)}, modifier = Modifier
-                        .weight(1F)
-                        , shape = RoundedCornerShape(30.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5BA890))) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(
+                        onClick = { navController.navigate(Routes.Sentence.route) },
+                        modifier = Modifier
+                            .weight(1F),
+                        shape = RoundedCornerShape(30.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5BA890))
+                    ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Image(
                                 ImageBitmap.imageResource(R.drawable.game),
                                 contentDescription = null,
-                                modifier = Modifier.size(90.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(90.dp)
                             )
-                            Text(text=stringResource(id = R.string.game),
+                            Text(
+                                text = stringResource(id = R.string.game),
                                 fontSize = 13.sp,
                                 fontFamily = fredokaFonts,
                                 fontWeight = FontWeight.Light,
-                                color = Color.White)
+                                color = Color.White
+                            )
                         }
                     }
                 }
             }
         }
     }
+}

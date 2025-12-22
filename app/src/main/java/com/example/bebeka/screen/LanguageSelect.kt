@@ -48,10 +48,7 @@ fun LanguageSelectScreen(
     // Массив языков с кодами
     val languages = listOf(
         "English" to "en",
-        "Russian" to "ru",
-        "Chinese" to "zh",
-        "Belarus" to "be",
-        "Kazakh" to "kk"
+        "Russian" to "ru"
     )
 
     // Восстанавливаем выбранный язык при загрузке
