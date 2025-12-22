@@ -99,17 +99,8 @@ fun MainScreen(navController: NavController, context: Context) {
                 fontFamily = fredokaFonts,
                 fontWeight = FontWeight.Medium)
             Spacer(modifier = Modifier.height(8.dp))
-            //Отображаем топ пользователей или заглушку, если список пуст
-            if (topUsers.isNotEmpty()) {
-                topUsers.forEachIndexed { index, user ->
-                    LeaderBoardUser(
-                        username = user.username,
-                        points = user.points,
-                        image = user.profileImage // Передаем байтовый массив
-                    )
-                }
-            } else {
-                Text(stringResource(id = R.string.no_users))
+
+            currentUser?.let { Text(stringResource(id = R.string.you_points, it.points)) }
                 Spacer(modifier = Modifier.height(20.dp))
             }
 
@@ -160,25 +151,8 @@ fun MainScreen(navController: NavController, context: Context) {
                 }
                 Spacer(Modifier.height(15.dp))
                 Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-                    Button(onClick = {navController.navigate(Routes.Audition.route)},modifier = Modifier
-                        .weight(1F)
-                        , shape = RoundedCornerShape(30.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF76400))) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Image(
-                                ImageBitmap.imageResource(R.drawable.audition),
-                                contentDescription = null,
-                                modifier = Modifier.size(90.dp)
-                            )
-                            Text(text=stringResource(id = R.string.audition),
-                                fontSize = 13.sp,
-                                fontFamily = fredokaFonts,
-                                fontWeight = FontWeight.Light,
-                                color = Color.White)
-                        }
-                    }
                     Spacer(Modifier.width(15.dp))
-                    Button(onClick = {}, modifier = Modifier
+                    Button(onClick = {navController.navigate(Routes.Sentence.route)}, modifier = Modifier
                         .weight(1F)
                         , shape = RoundedCornerShape(30.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5BA890))) {
@@ -199,54 +173,3 @@ fun MainScreen(navController: NavController, context: Context) {
             }
         }
     }
-}
-@Composable
-fun LeaderBoardUser(
-    username: String,
-    points: Int,
-    image: ByteArray? // Добавляем параметр для изображения
-) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(64.dp)
-            .background(color = Color(0xFFE5E5E5), shape = RoundedCornerShape(20.dp))
-            .padding(5.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Блок для отображения изображения
-        if (image != null) {
-            val bitmap = remember {
-                BitmapFactory.decodeByteArray(image, 0, image.size)
-                    .asImageBitmap()
-            }
-            Image(
-                bitmap = bitmap,
-                contentDescription = "Profile image",
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-            )
-        } else {
-            // Заглушка если изображения нет
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "No image",
-                modifier = Modifier.size(36.dp)
-            )
-        }
-        Text(text=username,
-            fontSize = 17.sp,
-            fontFamily = fredokaFonts,
-            fontWeight = FontWeight.Medium,
-            color = Color.Black)
-        Text(text=stringResource(id = R.string.points, points),
-            fontSize = 17.sp,
-            fontFamily = fredokaFonts,
-            fontWeight = FontWeight.Medium,
-            color = Color.Black)
-    }
-    Spacer(Modifier.height(10.dp))
-}
-

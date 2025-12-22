@@ -20,7 +20,7 @@ import com.example.bebeka.screen.ProfileScreen
 import com.example.bebeka.screen.SignUpPage1Screen
 import com.example.bebeka.screen.SignUpPage2Screen
 import com.example.bebeka.screen.SplashScreen
-import com.example.bebeka.screen.games.ListeningScreen
+import com.example.bebeka.screen.games.Sentence
 import com.example.profik.screen.games.animalGuess
 import com.example.bebeka.screen.imageOnBoard1
 import com.example.bebeka.screen.imageOnBoard2
@@ -43,7 +43,9 @@ public sealed class Routes(val route: String) {
     object Words : Routes("Words")
     object Audition : Routes("Audio")
     object Splash : Routes("Splash")
-    object Profile : Routes("Profile") // Добавлен новый маршрут для профиля
+    object Profile : Routes("Profile")
+    object Sentence : Routes("Sentence")
+
 }
 
 // Функция для создания маршрута Signup2 с параметрами
@@ -143,8 +145,9 @@ fun Navigation(navController: NavHostController, innerPadding: Modifier, context
             animalGuess(navController = navController, answer = answer)
         }
         composable(Routes.Words.route) { WordsScreen(navController = navController) }
-        composable(Routes.Audition.route) { ListeningScreen(navController = navController) }
-        composable(Routes.Profile.route) { ProfileScreen(navController = navController) } // Добавлен ProfileScreen
+        composable(Routes.Profile.route) { ProfileScreen(navController = navController) }
+        composable(Routes.Sentence.route) { Sentence(navController = navController) }
+
     }
 }
 @Composable
