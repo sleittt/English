@@ -47,6 +47,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.bebeka.BackNavigation
 import com.example.bebeka.R
 import com.example.bebeka.Routes
+import com.example.bebeka.firebase.FirestoreService
 import com.example.bebeka.logik.AppDatabase
 import com.example.bebeka.logik.PointsCalculator
 import com.example.bebeka.logik.SessionManager
@@ -70,13 +71,13 @@ val animals = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun animalScreen(navController: NavController) {
+fun animalScreen(navController: NavController, firestoreService: FirestoreService) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     // Инициализация репозитория
     val db = remember { AppDatabase.getDatabase(context) }
-    val userRepository = remember { UserRepository(db.userDao()) }
+    val userRepository = remember { UserRepository(db.userDao(), firestoreService) }
 
     // Получение ID текущего пользователя
     val currentUserId = remember { SessionManager.getCurrentUserId(context) }

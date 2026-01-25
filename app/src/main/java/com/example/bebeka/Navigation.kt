@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -11,6 +12,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.bebeka.firebase.FirestoreService
 import com.example.bebeka.screen.games.WordsScreen
 import com.example.profik.screen.games.animalScreen
 import com.example.bebeka.screen.LanguageSelectScreen
@@ -53,11 +55,18 @@ fun createSignup2Route(firstName: String, lastName: String, email: String): Stri
     return "signup2/${Uri.encode(firstName)}/${Uri.encode(lastName)}/${Uri.encode(email)}"
 }
 @Composable
-fun Navigation(navController: NavHostController, innerPadding: Modifier, context: Context){
+fun Navigation(
+    navController: NavHostController,
+    innerPadding: Modifier,
+    context: Context
+) {
+    // Создаем FirestoreService один раз с remember
+    val firestoreService = remember { FirestoreService() }
+
     NavHost(
         navController = navController,
         startDestination = Routes.Splash.route,
-    ){
+    ) {
         composable(Routes.Splash.route) { SplashScreen(navController = navController) }
         composable(Routes.onBoard1.route){
             onBoarding(
@@ -129,14 +138,36 @@ fun Navigation(navController: NavHostController, innerPadding: Modifier, context
             SignUpPage2Screen(
                 navController = navController,
                 context = context,
+                firestoreService = firestoreService, // Передаем service
                 firstName = firstName,
                 lastName = lastName,
                 email = email
             )
         }
-        composable(Routes.Login.route) { LogInScreen(navController = navController, context = context) }
-        composable(Routes.Main.route) { MainScreen(navController = navController,  context = context) }
-        composable(Routes.Animal.route) { animalScreen(navController = navController) }
+
+        composable(Routes.Login.route) {
+            LogInScreen(
+                navController = navController,
+                context = context,
+                firestoreService = firestoreService // Передаем service
+            )
+        }
+
+        composable(Routes.Main.route) {
+            MainScreen(
+                navController = navController,
+                context = context,
+                firestoreService = firestoreService // Передаем service
+            )
+        }
+
+        composable(Routes.Animal.route) {
+            animalScreen(
+                navController = navController,
+                firestoreService = firestoreService // Передаем service
+            )
+        }
+
         composable(
             Routes.AnimalGuess.route,
             arguments = listOf(navArgument("answer") { type = NavType.StringType })
@@ -144,10 +175,24 @@ fun Navigation(navController: NavHostController, innerPadding: Modifier, context
             val answer = backStackEntry.arguments?.getString("answer") ?: ""
             animalGuess(navController = navController, answer = answer)
         }
-        composable(Routes.Words.route) { WordsScreen(navController = navController) }
-        composable(Routes.Profile.route) { ProfileScreen(navController = navController) }
-        composable(Routes.Sentence.route) { Sentence(navController = navController) }
 
+        composable(Routes.Words.route) {
+            WordsScreen(
+                navController = navController,
+                firestoreService = firestoreService // Передаем service
+            )
+        }
+
+        composable(Routes.Profile.route) {
+            ProfileScreen(navController = navController)
+        }
+
+        composable(Routes.Sentence.route) {
+            Sentence(
+                navController = navController,
+                firestoreService = firestoreService // Передаем service
+            )
+        }
     }
 }
 @Composable

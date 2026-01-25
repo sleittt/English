@@ -41,6 +41,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.bebeka.BackNavigation
 import com.example.bebeka.R
 import com.example.bebeka.Routes
+import com.example.bebeka.firebase.FirestoreService
 import com.example.bebeka.logik.AppDatabase
 import com.example.bebeka.logik.PointsCalculator
 import com.example.bebeka.logik.SessionManager
@@ -68,13 +69,13 @@ val words=arrayOf(
 )
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WordsScreen(navController: NavController) {
+fun WordsScreen(navController: NavController, firestoreService: FirestoreService) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     BackNavigation(navController, Routes.Main.route)
     // Инициализация репозитория
     val db = remember { AppDatabase.getDatabase(context) }
-    val userRepository = remember { UserRepository(db.userDao()) }
+    val userRepository = remember { UserRepository(db.userDao(), firestoreService) }
 
     // Получение ID текущего пользователя
     val currentUserId = remember { SessionManager.getCurrentUserId(context) }
@@ -230,9 +231,3 @@ fun WordsScreen(navController: NavController) {
     }
 }
 
-
-@Preview
-@Composable
-fun prew(){
-    WordsScreen(rememberNavController())
-}

@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.bebeka.R
 import com.example.bebeka.Routes
+import com.example.bebeka.firebase.FirestoreService
 import com.example.bebeka.logik.AppDatabase
 import com.example.bebeka.logik.SessionManager
 import com.example.bebeka.logik.User
@@ -56,7 +57,7 @@ import kotlinx.coroutines.launch
 
 // Обновите MainScreen для загрузки пользователя из базы
 @Composable
-fun MainScreen(navController: NavController, context: Context) {
+fun MainScreen(navController: NavController, context: Context,    firestoreService: FirestoreService) {
     var topUsers by remember { mutableStateOf<List<User>>(emptyList()) }
     var currentUser by remember { mutableStateOf<User?>(null) }
 
