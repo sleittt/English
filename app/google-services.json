@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "479743230837",
+    "project_id": "englisapp-477fb",
+    "storage_bucket": "englisapp-477fb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:479743230837:android:122d3cee433cff6aa9493c",
+        "android_client_info": {
+          "package_name": "com.example.bebeka"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZRhMVKu5d7_PzCfVJYkzUchrL8mrVnZc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
