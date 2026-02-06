@@ -184,8 +184,10 @@ fun Navigation(
         }
 
         composable(Routes.Profile.route) {
-            ProfileScreen(navController = navController)
-        }
+            ProfileScreen(
+                navController = navController,
+                firestoreService = firestoreService // ТУТ ПЕРЕДАЙ!
+            )        }
 
         composable(Routes.Sentence.route) {
             Sentence(

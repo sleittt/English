@@ -1,6 +1,7 @@
 package com.example.bebeka.screen
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -64,6 +65,7 @@ import com.example.bebeka.ui.theme.fredokaFonts
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -269,22 +271,21 @@ fun SignUpPage1Screen(
 fun SignUpPage2Screen(
     navController: NavController,
     context: Context,
-    firestoreService: FirestoreService, // Получаем как параметр
+    firestoreService: FirestoreService,
     firstName: String,
     lastName: String,
     email: String
 ) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    var acceptedTerms by remember { mutableStateOf(false) }
+    //var acceptedTerms by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
     var confirmPasswordError by remember { mutableStateOf(false) }
-    var termsError by remember { mutableStateOf(false) }
+    //var termsError by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val db = remember { AppDatabase.getDatabase(context) }
-    val userRepository = remember { UserRepository(db.userDao(), firestoreService) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -308,7 +309,7 @@ fun SignUpPage2Screen(
             )
             Spacer(modifier = Modifier.height(18.dp))
 
-            PasswordFieldWithValidation(
+            PasswordField(
                 title = "Password",
                 value = password,
                 onValueChange = {
@@ -318,6 +319,13 @@ fun SignUpPage2Screen(
                 },
                 isError = passwordError
             )
+            if (passwordError) {
+                Text(
+                    text = "Password must be at least 6 characters",
+                    color = Color.Red,
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -341,26 +349,6 @@ fun SignUpPage2Screen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 8.dp)
-            ) {
-                Checkbox(
-                    checked = acceptedTerms,
-                    onCheckedChange = { acceptedTerms = it }
-                )
-                Text(text="I have made myself acquainted with the Rules and accept all its provisions,",
-                    fontSize = 17.sp,
-                    fontFamily = fredokaFonts,
-                    fontWeight = FontWeight.Light)
-            }
-            if (termsError) {
-                Text(
-                    text = "You must accept terms and conditions",
-                    color = Color.Red,
-                    modifier = Modifier.padding(start = 16.dp)
-                )
-            }
 
             errorMessage?.let { message ->
                 Text(
@@ -374,59 +362,89 @@ fun SignUpPage2Screen(
 
             Button(
                 onClick = {
-                    val isPasswordValid = isPasswordStrong(password)
+                    // Упрощенная валидация пароля
+                    val isPasswordValid = password.length >= 6
                     val doPasswordsMatch = password == confirmPassword
 
                     passwordError = !isPasswordValid
                     confirmPasswordError = !doPasswordsMatch
-                    termsError = !acceptedTerms
+                    //termsError = !acceptedTerms
 
-                    if (isPasswordValid && doPasswordsMatch && acceptedTerms) {
+                    if (isPasswordValid && doPasswordsMatch) {
                         isLoading = true
                         errorMessage = null
 
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
-                                // Проверяем локально
-                                val existingUser = db.userDao().getUserByEmail(email)
-                                if (existingUser != null) {
-                                    CoroutineScope(Dispatchers.Main).launch {
+                                // 1. Проверяем, есть ли пользователь с таким email локально
+                                val existingLocalUser = db.userDao().getUserByEmail(email)
+                                if (existingLocalUser != null) {
+                                    withContext(Dispatchers.Main) {
                                         isLoading = false
                                         errorMessage = "User with this email already exists"
                                     }
-                                } else {
-                                    // Регистрируем
-                                    val user = userRepository.registerUserWithFirestore(
+                                    return@launch
+                                }
+
+                                // 2. Создаем локального пользователя
+                                val username = "$firstName $lastName"
+
+                                // Сначала создаем локального пользователя
+                                val localUser = User(
+                                    email = email,
+                                    password = password,
+                                    username = username,
+                                    points = 0
+                                )
+
+                                val localId = db.userDao().insertUser(localUser)
+                                Log.d("SignUp", "✅ Local user created with ID: $localId")
+
+                                // 3. Пробуем создать пользователя в Firebase (если доступно)
+                                try {
+                                    val firestoreUser = firestoreService.registerUser(
                                         email = email,
                                         password = password,
-                                        username = "$firstName $lastName"
+                                        username = username
                                     )
 
-                                    if (user != null) {
-                                        SessionManager.saveUserSession(
-                                            context,
-                                            user.id,
-                                            user.firebaseId,
-                                            email
-                                        )
+                                    // Обновляем локального пользователя с firebaseId
+                                    val updatedLocalUser = localUser.copy(
+                                        id = localId,
+                                        firebaseId = firestoreUser.id
+                                    )
+                                    db.userDao().updateUser(updatedLocalUser)
 
-                                        CoroutineScope(Dispatchers.Main).launch {
-                                            isLoading = false
-                                            navController.navigate(Routes.Main.route) {
-                                                popUpTo(Routes.Signup1.route) { inclusive = true }
-                                            }
-                                        }
-                                    } else {
-                                        CoroutineScope(Dispatchers.Main).launch {
-                                            isLoading = false
-                                            errorMessage = "Registration failed"
-                                        }
+                                    // Обновляем localId в Firebase
+                                    firestoreService.updateLocalId(firestoreUser.id, localId)
+
+                                    Log.d("SignUp", "✅ Firebase user created: ${firestoreUser.id}")
+                                } catch (firebaseError: Exception) {
+                                    // Если Firebase недоступен, продолжаем только с локальным
+                                    Log.w("SignUp", "⚠️ Firebase unavailable, continuing locally: ${firebaseError.message}")
+                                }
+
+                                // 4. Сохраняем сессию
+                                SessionManager.saveUserSession(
+                                    context,
+                                    localId,
+                                    null, // firebaseId может быть null
+                                    email
+                                )
+
+                                // 5. Переходим на главный экран
+                                withContext(Dispatchers.Main) {
+                                    isLoading = false
+                                    navController.navigate(Routes.Main.route) {
+                                        popUpTo(Routes.Signup1.route) { inclusive = true }
                                     }
                                 }
+
                             } catch (e: Exception) {
-                                CoroutineScope(Dispatchers.Main).launch {
+                                Log.e("SignUp", "Registration error: ${e.message}", e)
+                                withContext(Dispatchers.Main) {
                                     isLoading = false
-                                    errorMessage = "Registration failed: ${e.message}"
+                                    errorMessage = "Registration failed: ${e.localizedMessage}"
                                 }
                             }
                         }
@@ -443,7 +461,10 @@ fun SignUpPage2Screen(
                         color = Color.White
                     )
                 } else {
-                    Text("Sign Up")
+                    Text("Sign Up",
+                        fontSize = 20.sp,
+                        fontFamily = fredokaFonts,
+                        fontWeight = FontWeight.Medium)
                 }
             }
         }
@@ -454,7 +475,7 @@ fun SignUpPage2Screen(
 fun LogInScreen(
     navController: NavController,
     context: Context,
-    firestoreService: FirestoreService // Добавляем параметр
+    firestoreService: FirestoreService
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -463,7 +484,6 @@ fun LogInScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val db = remember { AppDatabase.getDatabase(context) }
-    val userRepository = remember { UserRepository(db.userDao(), firestoreService) }
 
     Scaffold(topBar = {
         topAppBar(title="Login",
@@ -555,83 +575,112 @@ fun LogInScreen(
 
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
-                                // Пробуем войти через Firestore
-                                val firestoreUser = userRepository.loginWithFirestore(email, password)
+                                // 1. Пробуем войти локально
+                                val localUser = db.userDao().getUser(email, password)
 
-                                if (firestoreUser != null) {
-                                    // Успешный вход через Firestore
+                                if (localUser != null) {
+                                    // Если есть локальный пользователь, сохраняем сессию
                                     SessionManager.saveUserSession(
                                         context,
-                                        firestoreUser.id,
-                                        firestoreUser.firebaseId,
+                                        localUser.id,
+                                        localUser.firebaseId,
                                         email
                                     )
 
-                                    CoroutineScope(Dispatchers.Main).launch {
+                                    // Синхронизируем с Firebase при необходимости
+                                    localUser.firebaseId?.let { firebaseId ->
+                                        try {
+                                            // Проверяем, есть ли пользователь в Firebase
+                                            val firestoreUser = firestoreService.getUserById(firebaseId)
+
+                                            if (firestoreUser == null) {
+                                                // Если пользователя нет в Firebase, создаем его
+                                                val newFirestoreUser = firestoreService.registerUser(
+                                                    email = localUser.email,
+                                                    password = localUser.password,
+                                                    username = localUser.username
+                                                )
+
+                                                // Обновляем localId в Firebase
+                                                firestoreService.updateLocalId(newFirestoreUser.id, localUser.id)
+
+                                                // Обновляем локального пользователя с firebaseId
+                                                val updatedUser = localUser.copy(firebaseId = newFirestoreUser.id)
+                                                db.userDao().updateUser(updatedUser)
+
+                                                Log.d("Login", "✅ Created Firebase user for existing local user")
+                                            }
+                                        } catch (e: Exception) {
+                                            Log.w("Login", "⚠️ Firebase sync during login failed: ${e.message}")
+                                        }
+                                    }
+
+                                    withContext(Dispatchers.Main) {
                                         isLoading = false
                                         navController.navigate(Routes.Main.route) {
                                             popUpTo(Routes.Login.route) { inclusive = true }
                                         }
                                     }
                                 } else {
-                                    // Если Firestore не сработал, пробуем локально
-                                    val localUser = db.userDao().getUser(email, password)
+                                    // 2. Если локального пользователя нет, пробуем Firebase
+                                    try {
+                                        val firestoreUser = firestoreService.loginUser(email, password)
 
-                                    if (localUser != null) {
-                                        SessionManager.saveUserSession(
-                                            context,
-                                            localUser.id,
-                                            localUser.firebaseId,
-                                            email
-                                        )
+                                        if (firestoreUser != null) {
+                                            // Создаем локального пользователя из Firebase
+                                            val newLocalUser = User(
+                                                email = firestoreUser.email,
+                                                password = password,
+                                                username = firestoreUser.username,
+                                                points = firestoreUser.points,
+                                                firebaseId = firestoreUser.id
+                                            )
 
-                                        CoroutineScope(Dispatchers.Main).launch {
-                                            isLoading = false
-                                            navController.navigate(Routes.Main.route) {
-                                                popUpTo(Routes.Login.route) { inclusive = true }
+                                            val localId = db.userDao().insertUser(newLocalUser)
+
+                                            // Обновляем localId в Firebase
+                                            firestoreService.updateLocalId(firestoreUser.id, localId)
+
+                                            // Сохраняем сессию
+                                            SessionManager.saveUserSession(
+                                                context,
+                                                localId,
+                                                firestoreUser.id,
+                                                email
+                                            )
+
+                                            withContext(Dispatchers.Main) {
+                                                isLoading = false
+                                                navController.navigate(Routes.Main.route) {
+                                                    popUpTo(Routes.Login.route) { inclusive = true }
+                                                }
+                                            }
+                                        } else {
+                                            withContext(Dispatchers.Main) {
+                                                isLoading = false
+                                                errorMessage = "Invalid email or password"
                                             }
                                         }
-                                    } else {
-                                        CoroutineScope(Dispatchers.Main).launch {
+                                    } catch (firebaseError: Exception) {
+                                        Log.w("Login", "Firebase login failed: ${firebaseError.message}")
+                                        withContext(Dispatchers.Main) {
                                             isLoading = false
                                             errorMessage = "Invalid email or password"
                                         }
                                     }
                                 }
                             } catch (e: Exception) {
-                                // Если ошибка Firestore, пробуем только локально
-                                println("⚠️ Firestore login error, trying local: ${e.message}")
-
-                                try {
-                                    val user = db.userDao().getUser(email, password)
-                                    if (user != null) {
-                                        SessionManager.saveUserSession(
-                                            context,
-                                            user.id,
-                                            user.firebaseId,
-                                            email
-                                        )
-
-                                        CoroutineScope(Dispatchers.Main).launch {
-                                            isLoading = false
-                                            navController.navigate(Routes.Main.route) {
-                                                popUpTo(Routes.Login.route) { inclusive = true }
-                                            }
-                                        }
-                                    } else {
-                                        CoroutineScope(Dispatchers.Main).launch {
-                                            isLoading = false
-                                            errorMessage = "Invalid email or password"
-                                        }
-                                    }
-                                } catch (localE: Exception) {
-                                    CoroutineScope(Dispatchers.Main).launch {
-                                        isLoading = false
-                                        errorMessage = "Login failed: ${localE.message}"
-                                    }
+                                Log.e("Login", "Login error: ${e.message}", e)
+                                withContext(Dispatchers.Main) {
+                                    isLoading = false
+                                    errorMessage = "Login failed: ${e.localizedMessage}"
                                 }
                             }
                         }
+                    } else if (!isEmailValid) {
+                        errorMessage = "Please enter a valid email"
+                    } else if (password.isEmpty()) {
+                        errorMessage = "Please enter password"
                     }
                 },
                 modifier = Modifier.height(56.dp).fillMaxWidth(),
@@ -645,7 +694,10 @@ fun LogInScreen(
                         color = Color.White
                     )
                 } else {
-                    Text("Log In")
+                    Text("Log In",
+                        fontSize = 20.sp,
+                        fontFamily = fredokaFonts,
+                        fontWeight = FontWeight.Medium)
                 }
             }
 
@@ -788,12 +840,12 @@ fun isPasswordStrong(password: String): Boolean {
     val hasUpperCase = password.any { it.isUpperCase() }
     val hasLowerCase = password.any { it.isLowerCase() }
     val hasDigit = password.any { it.isDigit() }
-    val hasSpace = password.any { it.isWhitespace() }
+    //val hasSpace = password.any { it.isWhitespace() }
     val hasSpecialChar = password.any {
         !it.isLetterOrDigit() && !it.isWhitespace()
     }
 
-    return hasUpperCase && hasLowerCase && hasDigit && hasSpace && hasSpecialChar
+    return hasUpperCase && hasLowerCase && hasDigit && hasSpecialChar
 }
 
 // Basic PasswordField component

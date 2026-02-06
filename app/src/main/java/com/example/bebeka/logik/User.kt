@@ -1,6 +1,8 @@
 package com.example.bebeka.logik
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.room.Dao
 import androidx.room.Database
@@ -194,6 +196,27 @@ class UserRepository(
             throw e
         }
     }
+    suspend fun updateUserProfileImage(userId: Long, imageBytes: ByteArray?) {
+        try {
+            // Сохраняем в локальную базу
+            userDao.updateUserImage(userId, imageBytes)
+
+            // Получаем пользователя
+            val user = userDao.getUserById(userId)
+
+            // Если у пользователя есть firebaseId, синхронизируем с Firebase
+            user?.firebaseId?.let { firebaseId ->
+                // Кодируем в Base64 строку для Firebase
+                val base64Image = imageBytes?.let {
+                    android.util.Base64.encodeToString(it, android.util.Base64.DEFAULT)
+                }
+                // Вызываем правильный метод
+                firestoreService.updateUserProfileImage(firebaseId, base64Image)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating profile image: ${e.message}")
+        }
+    }
 
     // Вход
     suspend fun loginWithFirestore(email: String, password: String): User? {
@@ -267,6 +290,27 @@ class UserRepository(
                     Log.w(TAG, "Failed to sync points to Firestore: ${e.message}")
                 }
             }
+        }
+    }
+
+
+    suspend fun syncProfileImageFromFirebase(userId: Long) {
+        try {
+            val user = userDao.getUserById(userId)
+            user?.firebaseId?.let { firebaseId ->
+                // Получаем аватарку из Firebase
+                val bitmap = firestoreService.getUserProfileImage(firebaseId)
+
+                // Сохраняем в локальную базу
+                if (bitmap != null) {
+                    val stream = java.io.ByteArrayOutputStream()
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
+                    val imageBytes = stream.toByteArray()
+                    userDao.updateUserImage(userId, imageBytes)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error syncing profile image from Firebase: ${e.message}")
         }
     }
 
