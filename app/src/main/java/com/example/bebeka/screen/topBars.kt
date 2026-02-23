@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -59,7 +59,7 @@ fun topAppBar(title: String, navController: NavController, routes: String){
         colors = TopAppBarDefaults.topAppBarColors(containerColor = DeepBlue),
         navigationIcon = {
             Icon(
-                Icons.Filled.ArrowBack,
+                Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = null, modifier =  Modifier.clickable(
                     onClick = { navController.navigate(routes) }
                 ),
@@ -79,7 +79,7 @@ fun topAppBar(title: String, navController: NavController){
         colors = TopAppBarDefaults.topAppBarColors(containerColor = DeepBlue),
         navigationIcon = {
             Icon(
-                Icons.Filled.ArrowBack,
+                Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = null, modifier =  Modifier.clickable(
                     onClick = { navController.popBackStack() }
                 ),

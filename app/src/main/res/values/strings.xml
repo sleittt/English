@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">English</string>
+    <string name="app_name">EasySpeak</string>
     <string name="you_points">Your points: %1$s</string>
     <string name="tops">Top users</string>
     <string name="exc">Available exercises</string>

@@ -14,7 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.bebeka.firebase.FirestoreService
 import com.example.bebeka.screen.games.WordsScreen
-import com.example.profik.screen.games.animalScreen
+import com.example.bebeka.screen.games.animalScreen
 import com.example.bebeka.screen.LanguageSelectScreen
 import com.example.bebeka.screen.LogInScreen
 import com.example.bebeka.screen.MainScreen
@@ -23,7 +23,7 @@ import com.example.bebeka.screen.SignUpPage1Screen
 import com.example.bebeka.screen.SignUpPage2Screen
 import com.example.bebeka.screen.SplashScreen
 import com.example.bebeka.screen.games.Sentence
-import com.example.profik.screen.games.animalGuess
+import com.example.bebeka.screen.games.animalGuess
 import com.example.bebeka.screen.imageOnBoard1
 import com.example.bebeka.screen.imageOnBoard2
 import com.example.bebeka.screen.imageOnBoard3

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ИмяПриложения</string>
+    <string name="app_name">EasySpeak</string>
     <string name="you_points">Очков: %1$s</string>
     <string name="tops">Топ пользователей</string>
     <string name="exc">Доступные упражнения</string>

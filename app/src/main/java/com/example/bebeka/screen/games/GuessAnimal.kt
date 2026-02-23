@@ -1,4 +1,4 @@
-package com.example.profik.screen.games
+package com.example.bebeka.screen.games
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -112,7 +112,7 @@ fun animalScreen(navController: NavController, firestoreService: FirestoreServic
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = DeepBlue),
                 navigationIcon = {
                     Icon(
-                        Icons.Filled.ArrowBack,
+                        Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = null, modifier = Modifier.clickable(
                             onClick = { navController.navigate(Routes.Main.route) }
                         ),
@@ -210,7 +210,7 @@ fun animalGuess(navController: NavController, answer: String) {
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = if (answer=="correct") Color(0xFF5BA890) else Color(0xFFD6185D)),
                 navigationIcon = {
                     Icon(
-                        Icons.Filled.ArrowBack,
+                        Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = null, modifier =  Modifier.clickable(
                             onClick = { navController.navigate(Routes.Main.route) }
                         ),
