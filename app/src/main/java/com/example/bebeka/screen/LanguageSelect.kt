@@ -35,6 +35,7 @@ import com.example.bebeka.data.updateLocale
 import com.example.bebeka.ui.theme.enabledBox
 import com.example.bebeka.ui.theme.enabledButton
 import com.example.bebeka.ui.theme.fredokaFonts
+import com.example.bebeka.utils.DebugLogger
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,19 +46,19 @@ fun LanguageSelectScreen(
     val context = LocalContext.current
     var selected by remember { mutableStateOf(-1) }
 
-    // Массив языков с кодами
     val languages = listOf(
         "English" to "en",
         "Russian" to "ru"
     )
 
-    // Восстанавливаем выбранный язык при загрузке
     LaunchedEffect(Unit) {
         val prefs = Prefs(context)
         val savedLanguage = prefs.language
+        DebugLogger.d("LanguageSelect", "Loaded saved language: $savedLanguage")
         val index = languages.indexOfFirst { it.second == savedLanguage }
         if (index != -1) {
             selected = index
+            DebugLogger.d("LanguageSelect", "Restored selected index: $index")
         }
     }
 
@@ -96,20 +97,20 @@ fun LanguageSelectScreen(
                         if (selected > -1) {
                             val prefs = Prefs(context)
                             val languageCode = languages[selected].second
+                            DebugLogger.d("LanguageSelect", "User selected language: ${languages[selected].first} ($languageCode)")
 
-                            // Сохраняем выбранный язык
                             prefs.language = languageCode
-
-                            // Применяем изменение языка
                             updateLocale(context, languageCode)
 
-                            if (selected > -1) {
-                                if (firstChange) {
-                                    navController.navigate(Routes.Signup1.route)
-                                } else {
-                                    navController.navigate(Routes.Main.route)
-                                }
+                            if (firstChange) {
+                                DebugLogger.d("LanguageSelect", "First language selection -> navigate to Signup1")
+                                navController.navigate(Routes.Signup1.route)
+                            } else {
+                                DebugLogger.d("LanguageSelect", "Language changed later -> navigate to Main")
+                                navController.navigate(Routes.Main.route)
                             }
+                        } else {
+                            DebugLogger.d("LanguageSelect", "No language selected, button disabled")
                         }
                     },
                     modifier = Modifier
@@ -150,7 +151,10 @@ fun SelectableButtons(
         languages.forEachIndexed { i, language ->
             val isSelected = i == selectedIndex
             Button(
-                onClick = { selectedIndex = i },
+                onClick = {
+                    selectedIndex = i
+                    DebugLogger.d("LanguageSelect", "Button clicked: $language, index=$i")
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (!isSelected) Color(0xFFFFF6EB) else enabledBox
                 ),

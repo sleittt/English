@@ -62,11 +62,11 @@ import com.example.bebeka.logik.User
 import com.example.bebeka.logik.UserRepository
 import com.example.bebeka.ui.theme.enabledButton
 import com.example.bebeka.ui.theme.fredokaFonts
+import com.example.bebeka.utils.DebugLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,6 +82,8 @@ fun SignUpPage1Screen(
     var firstNameError by remember { mutableStateOf(false) }
     var lastNameError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
+
+    DebugLogger.d("SignUpPage1", "Screen loaded")
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -218,21 +220,26 @@ fun SignUpPage1Screen(
             // Continue button
             Button(
                 onClick = {
+                    DebugLogger.d("SignUpPage1", "Continue clicked")
                     var hasError = false
                     if (firstName.isBlank()) {
                         firstNameError = true
                         hasError = true
+                        DebugLogger.d("SignUpPage1", "First name missing")
                     }
                     if (lastName.isBlank()) {
                         lastNameError = true
                         hasError = true
+                        DebugLogger.d("SignUpPage1", "Last name missing")
                     }
                     if (!isValidEmail(email)) {
                         emailError = true
                         hasError = true
+                        DebugLogger.d("SignUpPage1", "Invalid email: $email")
                     }
 
                     if (!hasError) {
+                        DebugLogger.d("SignUpPage1", "Validation passed, moving to password screen")
                         onContinue(firstName, lastName, email)
                     }
                 },
@@ -259,6 +266,7 @@ fun SignUpPage1Screen(
                     text = "Login",
                     color = enabledButton,
                     modifier = Modifier.clickable {
+                        DebugLogger.d("SignUpPage1", "Navigate to Login")
                         navController.navigate(Routes.Login.route)
                     }
                 )
@@ -266,6 +274,7 @@ fun SignUpPage1Screen(
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpPage2Screen(
@@ -278,14 +287,14 @@ fun SignUpPage2Screen(
 ) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    //var acceptedTerms by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
     var confirmPasswordError by remember { mutableStateOf(false) }
-    //var termsError by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val db = remember { AppDatabase.getDatabase(context) }
+
+    DebugLogger.d("SignUpPage2", "Screen loaded for email: $email")
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -349,7 +358,6 @@ fun SignUpPage2Screen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
             errorMessage?.let { message ->
                 Text(
                     text = message,
@@ -362,23 +370,24 @@ fun SignUpPage2Screen(
 
             Button(
                 onClick = {
-                    // Упрощенная валидация пароля
+                    DebugLogger.d("SignUpPage2", "Sign Up button clicked")
                     val isPasswordValid = password.length >= 6
                     val doPasswordsMatch = password == confirmPassword
 
                     passwordError = !isPasswordValid
                     confirmPasswordError = !doPasswordsMatch
-                    //termsError = !acceptedTerms
 
                     if (isPasswordValid && doPasswordsMatch) {
+                        DebugLogger.d("SignUpPage2", "Password validation passed")
                         isLoading = true
                         errorMessage = null
 
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
-                                // 1. Проверяем, есть ли пользователь с таким email локально
+                                DebugLogger.d("SignUpPage2", "Checking existing local user for email: $email")
                                 val existingLocalUser = db.userDao().getUserByEmail(email)
                                 if (existingLocalUser != null) {
+                                    DebugLogger.d("SignUpPage2", "User already exists locally")
                                     withContext(Dispatchers.Main) {
                                         isLoading = false
                                         errorMessage = "User with this email already exists"
@@ -386,10 +395,7 @@ fun SignUpPage2Screen(
                                     return@launch
                                 }
 
-                                // 2. Создаем локального пользователя
                                 val username = "$firstName $lastName"
-
-                                // Сначала создаем локального пользователя
                                 val localUser = User(
                                     email = email,
                                     password = password,
@@ -397,57 +403,55 @@ fun SignUpPage2Screen(
                                     points = 0
                                 )
 
+                                DebugLogger.d("SignUpPage2", "Inserting local user into Room")
                                 val localId = db.userDao().insertUser(localUser)
-                                Log.d("SignUp", "✅ Local user created with ID: $localId")
+                                DebugLogger.d("SignUpPage2", "✅ Local user created with ID: $localId")
 
-                                // 3. Пробуем создать пользователя в Firebase (если доступно)
+                                // Firebase registration attempt
                                 try {
+                                    DebugLogger.d("SignUpPage2", "Registering user in Firebase")
                                     val firestoreUser = firestoreService.registerUser(
                                         email = email,
                                         password = password,
                                         username = username
                                     )
-
-                                    // Обновляем локального пользователя с firebaseId
                                     val updatedLocalUser = localUser.copy(
                                         id = localId,
                                         firebaseId = firestoreUser.id
                                     )
                                     db.userDao().updateUser(updatedLocalUser)
-
-                                    // Обновляем localId в Firebase
                                     firestoreService.updateLocalId(firestoreUser.id, localId)
-
-                                    Log.d("SignUp", "✅ Firebase user created: ${firestoreUser.id}")
+                                    DebugLogger.d("SignUpPage2", "✅ Firebase user created: ${firestoreUser.id}")
                                 } catch (firebaseError: Exception) {
-                                    // Если Firebase недоступен, продолжаем только с локальным
-                                    Log.w("SignUp", "⚠️ Firebase unavailable, continuing locally: ${firebaseError.message}")
+                                    DebugLogger.e("SignUpPage2", "⚠️ Firebase unavailable, continuing locally: ${firebaseError.message}", firebaseError)
                                 }
 
-                                // 4. Сохраняем сессию
+                                DebugLogger.d("SignUpPage2", "Saving user session")
                                 SessionManager.saveUserSession(
                                     context,
                                     localId,
-                                    null, // firebaseId может быть null
+                                    null,
                                     email
                                 )
 
-                                // 5. Переходим на главный экран
                                 withContext(Dispatchers.Main) {
                                     isLoading = false
+                                    DebugLogger.d("SignUpPage2", "Navigation to MainScreen")
                                     navController.navigate(Routes.Main.route) {
                                         popUpTo(Routes.Signup1.route) { inclusive = true }
                                     }
                                 }
 
                             } catch (e: Exception) {
-                                Log.e("SignUp", "Registration error: ${e.message}", e)
+                                DebugLogger.e("SignUpPage2", "Registration error: ${e.message}", e)
                                 withContext(Dispatchers.Main) {
                                     isLoading = false
                                     errorMessage = "Registration failed: ${e.localizedMessage}"
                                 }
                             }
                         }
+                    } else {
+                        DebugLogger.d("SignUpPage2", "Password validation failed: lengthValid=$isPasswordValid, match=$doPasswordsMatch")
                     }
                 },
                 modifier = Modifier.height(56.dp).fillMaxWidth(),
@@ -484,6 +488,8 @@ fun LogInScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val db = remember { AppDatabase.getDatabase(context) }
+
+    DebugLogger.d("LogInScreen", "Login screen loaded")
 
     Scaffold(topBar = {
         topAppBar(title="Login",
@@ -553,7 +559,6 @@ fun LogInScreen(
                 isError = false
             )
 
-            // Error message
             errorMessage?.let { message ->
                 Text(
                     text = message,
@@ -566,6 +571,7 @@ fun LogInScreen(
 
             Button(
                 onClick = {
+                    DebugLogger.d("LogInScreen", "Login button clicked for email: $email")
                     val isEmailValid = isValidEmail(email)
                     emailError = !isEmailValid
 
@@ -575,11 +581,11 @@ fun LogInScreen(
 
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
-                                // 1. Пробуем войти локально
+                                DebugLogger.d("LogInScreen", "Attempting local login for $email")
                                 val localUser = db.userDao().getUser(email, password)
 
                                 if (localUser != null) {
-                                    // Если есть локальный пользователь, сохраняем сессию
+                                    DebugLogger.d("LogInScreen", "Local user found: id=${localUser.id}")
                                     SessionManager.saveUserSession(
                                         context,
                                         localUser.id,
@@ -587,47 +593,41 @@ fun LogInScreen(
                                         email
                                     )
 
-                                    // Синхронизируем с Firebase при необходимости
+                                    // Sync with Firebase if needed
                                     localUser.firebaseId?.let { firebaseId ->
                                         try {
-                                            // Проверяем, есть ли пользователь в Firebase
+                                            DebugLogger.d("LogInScreen", "Checking Firebase user existence")
                                             val firestoreUser = firestoreService.getUserById(firebaseId)
-
                                             if (firestoreUser == null) {
-                                                // Если пользователя нет в Firebase, создаем его
+                                                DebugLogger.d("LogInScreen", "No Firebase user, creating one")
                                                 val newFirestoreUser = firestoreService.registerUser(
                                                     email = localUser.email,
                                                     password = localUser.password,
                                                     username = localUser.username
                                                 )
-
-                                                // Обновляем localId в Firebase
                                                 firestoreService.updateLocalId(newFirestoreUser.id, localUser.id)
-
-                                                // Обновляем локального пользователя с firebaseId
                                                 val updatedUser = localUser.copy(firebaseId = newFirestoreUser.id)
                                                 db.userDao().updateUser(updatedUser)
-
-                                                Log.d("Login", "✅ Created Firebase user for existing local user")
+                                                DebugLogger.d("LogInScreen", "Firebase user created")
                                             }
                                         } catch (e: Exception) {
-                                            Log.w("Login", "⚠️ Firebase sync during login failed: ${e.message}")
+                                            DebugLogger.e("LogInScreen", "Firebase sync failed: ${e.message}", e)
                                         }
                                     }
 
                                     withContext(Dispatchers.Main) {
                                         isLoading = false
+                                        DebugLogger.d("LogInScreen", "Login success, navigate to Main")
                                         navController.navigate(Routes.Main.route) {
                                             popUpTo(Routes.Login.route) { inclusive = true }
                                         }
                                     }
                                 } else {
-                                    // 2. Если локального пользователя нет, пробуем Firebase
+                                    DebugLogger.d("LogInScreen", "No local user, trying Firebase login")
                                     try {
                                         val firestoreUser = firestoreService.loginUser(email, password)
-
                                         if (firestoreUser != null) {
-                                            // Создаем локального пользователя из Firebase
+                                            DebugLogger.d("LogInScreen", "Firebase user found: ${firestoreUser.id}")
                                             val newLocalUser = User(
                                                 email = firestoreUser.email,
                                                 password = password,
@@ -635,34 +635,26 @@ fun LogInScreen(
                                                 points = firestoreUser.points,
                                                 firebaseId = firestoreUser.id
                                             )
-
                                             val localId = db.userDao().insertUser(newLocalUser)
-
-                                            // Обновляем localId в Firebase
                                             firestoreService.updateLocalId(firestoreUser.id, localId)
-
-                                            // Сохраняем сессию
-                                            SessionManager.saveUserSession(
-                                                context,
-                                                localId,
-                                                firestoreUser.id,
-                                                email
-                                            )
+                                            SessionManager.saveUserSession(context, localId, firestoreUser.id, email)
 
                                             withContext(Dispatchers.Main) {
                                                 isLoading = false
+                                                DebugLogger.d("LogInScreen", "Firebase login success, navigate to Main")
                                                 navController.navigate(Routes.Main.route) {
                                                     popUpTo(Routes.Login.route) { inclusive = true }
                                                 }
                                             }
                                         } else {
+                                            DebugLogger.d("LogInScreen", "Firebase login returned null user")
                                             withContext(Dispatchers.Main) {
                                                 isLoading = false
                                                 errorMessage = "Invalid email or password"
                                             }
                                         }
                                     } catch (firebaseError: Exception) {
-                                        Log.w("Login", "Firebase login failed: ${firebaseError.message}")
+                                        DebugLogger.e("LogInScreen", "Firebase login failed: ${firebaseError.message}", firebaseError)
                                         withContext(Dispatchers.Main) {
                                             isLoading = false
                                             errorMessage = "Invalid email or password"
@@ -670,7 +662,7 @@ fun LogInScreen(
                                     }
                                 }
                             } catch (e: Exception) {
-                                Log.e("Login", "Login error: ${e.message}", e)
+                                DebugLogger.e("LogInScreen", "Login error: ${e.message}", e)
                                 withContext(Dispatchers.Main) {
                                     isLoading = false
                                     errorMessage = "Login failed: ${e.localizedMessage}"
@@ -703,7 +695,6 @@ fun LogInScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Sign Up link
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
@@ -713,6 +704,7 @@ fun LogInScreen(
                     text = "Signup",
                     color = enabledButton,
                     modifier = Modifier.clickable {
+                        DebugLogger.d("LogInScreen", "Navigate to Signup")
                         navController.navigate(Routes.Signup1.route)
                     }
                 )
@@ -720,7 +712,6 @@ fun LogInScreen(
         }
     }
 }
-
 
 @Composable
 fun PasswordFieldWithValidation(
@@ -764,17 +755,6 @@ fun PasswordFieldWithValidation(
             ),
             shape = RoundedCornerShape(10.dp)
         )
-
-        // Password requirements indicator
-        //PasswordRequirementsIndicator(password = value)
-
-        if (isError) {
-            Text(
-                text = "Password doesn't meet requirements",
-                color = Color.Red,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-        }
     }
 }
 
@@ -828,7 +808,6 @@ fun RequirementItem(requirement: Requirement) {
 
 data class Requirement(val text: String, val met: Boolean)
 
-// Validation functions
 fun isValidEmail(email: String): Boolean {
     val emailRegex = "^[a-z0-9]+@[a-z0-9]+\\.[a-z]+\$".toRegex()
     return emailRegex.matches(email)
@@ -840,7 +819,6 @@ fun isPasswordStrong(password: String): Boolean {
     val hasUpperCase = password.any { it.isUpperCase() }
     val hasLowerCase = password.any { it.isLowerCase() }
     val hasDigit = password.any { it.isDigit() }
-    //val hasSpace = password.any { it.isWhitespace() }
     val hasSpecialChar = password.any {
         !it.isLetterOrDigit() && !it.isWhitespace()
     }
@@ -848,7 +826,6 @@ fun isPasswordStrong(password: String): Boolean {
     return hasUpperCase && hasLowerCase && hasDigit && hasSpecialChar
 }
 
-// Basic PasswordField component
 @Composable
 fun PasswordField(
     title: String,
@@ -890,4 +867,3 @@ fun PasswordField(
         )
     }
 }
-

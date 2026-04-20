@@ -51,32 +51,35 @@ import com.example.bebeka.logik.SessionManager
 import com.example.bebeka.logik.User
 import com.example.bebeka.ui.theme.enabledButton
 import com.example.bebeka.ui.theme.fredokaFonts
+import com.example.bebeka.utils.DebugLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-// Обновите MainScreen для загрузки пользователя из базы
 @Composable
-fun MainScreen(navController: NavController, context: Context,    firestoreService: FirestoreService) {
+fun MainScreen(navController: NavController, context: Context, firestoreService: FirestoreService) {
     var topUsers by remember { mutableStateOf<List<User>>(emptyList()) }
     var currentUser by remember { mutableStateOf<User?>(null) }
 
     val db = remember { AppDatabase.getDatabase(context) }
 
-    // Загружаем данные при запуске
     LaunchedEffect(Unit) {
+        DebugLogger.d("MainScreen", "MainScreen loaded, loading user data")
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // Загружаем данные пользователя
                 val currentUserId = SessionManager.getCurrentUserId(context)
+                DebugLogger.d("MainScreen", "Current user ID from SessionManager: $currentUserId")
                 if (currentUserId != -1L) {
                     currentUser = db.userDao().getUserById(currentUserId)
+                    DebugLogger.d("MainScreen", "Loaded current user: ${currentUser?.username} (points=${currentUser?.points})")
+                } else {
+                    DebugLogger.d("MainScreen", "No valid user ID found")
                 }
 
-                // Загружаем топ пользователей для лидерборда
                 topUsers = db.userDao().getTopUsers()
+                DebugLogger.d("MainScreen", "Loaded ${topUsers.size} top users for leaderboard")
             } catch (e: Exception) {
-                Log.e("MainScreen", "Error loading user data: ${e.message}")
+                DebugLogger.e("MainScreen", "Error loading user data: ${e.message}", e)
             }
         }
     }
@@ -86,7 +89,7 @@ fun MainScreen(navController: NavController, context: Context,    firestoreServi
             topMainBar(
                 nickname = currentUser?.username,
                 navController = navController,
-                currentUser = currentUser // Передаем currentUser в topMainBar
+                currentUser = currentUser
             )
         },
         modifier = Modifier.fillMaxSize()
@@ -102,7 +105,6 @@ fun MainScreen(navController: NavController, context: Context,    firestoreServi
 
             currentUser?.let { Text(stringResource(id = R.string.you_points, it.points)) }
             Spacer(modifier = Modifier.height(20.dp))
-
 
             Text(
                 text = stringResource(id = R.string.exc),
@@ -122,7 +124,10 @@ fun MainScreen(navController: NavController, context: Context,    firestoreServi
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Button(
-                        onClick = { navController.navigate(Routes.Animal.route) },
+                        onClick = {
+                            DebugLogger.d("MainScreen", "Navigate to Animal screen")
+                            navController.navigate(Routes.Animal.route)
+                        },
                         modifier = Modifier
                             .weight(1F),
                         shape = RoundedCornerShape(30.dp),
@@ -145,7 +150,10 @@ fun MainScreen(navController: NavController, context: Context,    firestoreServi
                     }
                     Spacer(Modifier.width(15.dp))
                     Button(
-                        onClick = { navController.navigate(Routes.Words.route) },
+                        onClick = {
+                            DebugLogger.d("MainScreen", "Navigate to Words screen")
+                            navController.navigate(Routes.Words.route)
+                        },
                         modifier = Modifier
                             .weight(1F),
                         shape = RoundedCornerShape(30.dp),
@@ -173,7 +181,10 @@ fun MainScreen(navController: NavController, context: Context,    firestoreServi
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Button(
-                        onClick = { navController.navigate(Routes.Sentence.route) },
+                        onClick = {
+                            DebugLogger.d("MainScreen", "Navigate to Sentence screen")
+                            navController.navigate(Routes.Sentence.route)
+                        },
                         modifier = Modifier
                             .weight(1F),
                         shape = RoundedCornerShape(30.dp),
